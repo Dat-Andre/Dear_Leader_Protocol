@@ -1,6 +1,6 @@
 [package]
-name = "default"
-description = "Description of the contract"
+name = "asset_manager"
+description = "Asset Manager contract"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

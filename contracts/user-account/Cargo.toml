@@ -1,6 +1,6 @@
 [package]
-name = "default"
-description = "Description of the contract"
+name = "user-account"
+description = "User Account contract"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
