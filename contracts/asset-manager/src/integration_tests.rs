@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::helpers::CwTemplateContract;
+    /* use crate::helpers::CwTemplateContract;
     use crate::msg::InstantiateMsg;
     use cosmwasm_std::{Addr, Coin, Empty, Uint128};
     use cw_multi_test::{App, AppBuilder, Contract, ContractWrapper, Executor};
@@ -67,5 +67,5 @@ mod tests {
             let cosmos_msg = cw_template_contract.call(msg).unwrap();
             app.execute(Addr::unchecked(USER), cosmos_msg).unwrap();
         }
-    }
+    } */
 }

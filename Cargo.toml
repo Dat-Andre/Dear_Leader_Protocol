@@ -2,12 +2,12 @@
 members = ["contracts/*"] #, "packages/*"
 
 [workspace.package]
-version = "0.0.0"
+version = "0.0.1"
 authors = ["Dat Andre <junojunojunojuno@proton.me>"]
 edition = "2021"
-name = "multi-contract-boilerplate"
-description = "A template for a multi-contract project"
-rust-version  = "1.65.0"
+name = "caveat_protocol"
+description = "Caveat Protocol"
+rust-version = "1.65.0"
 
 exclude = [
   # Those files are rust-optimizer artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
@@ -49,6 +49,7 @@ cosmwasm-schema = "1.1.3"
 cosmwasm-std = "1.1.3"
 cosmwasm-storage = "1.1.3"
 cw-storage-plus = "0.16"
+cw-utils = "0.16"
 cw2 = "0.16"
 schemars = "0.8.10"
 serde = { version = "1.0.145", default-features = false, features = ["derive"] }
