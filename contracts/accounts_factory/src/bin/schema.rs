@@ -1,5 +1,5 @@
 use cosmwasm_schema::write_api;
-use user_account::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use default::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 // use multi_contract_boilerplate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 

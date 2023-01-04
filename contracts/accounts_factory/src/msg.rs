@@ -1,5 +1,7 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::Uint128;
+use cosmwasm_std::{Coin, Uint128};
+
+use crate::state::BalanceState;
 
 #[cw_serde]
 pub struct InstantiateMsg {
@@ -8,27 +10,11 @@ pub struct InstantiateMsg {
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    Delegate {
-        validator_addr: String,
+    WithdrawAvailableShare {
+        coin: Coin,
+        asset_manager_addr: String,
     },
-    Undelegate {
-        amount: Uint128,
-        validator_addr: String,
-    },
-    Claim {},
-    Redelagate {
-        from_validator_addr: String,
-        to_validator_addr: String,
-        amount: Uint128,
-    },
-    UndelegateAll {},
-    TransferVotePower {
-        dear_leader_addr: String,
-    },
-    Vote {
-        proposal_id: u64,
-        vote_option: u64,
-    },
+    WithdrawAllAvailableShare {},
 }
 
 #[cw_serde]

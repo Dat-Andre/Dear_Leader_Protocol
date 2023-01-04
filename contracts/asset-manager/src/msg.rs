@@ -11,6 +11,7 @@ pub struct InstantiateMsg {
 #[cw_serde]
 pub enum ExecuteMsg {
     WithdrawAvailableShare { coin: Coin },
+    WithdrawAllAvailableShare {},
 }
 
 #[cw_serde]
