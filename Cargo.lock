@@ -9,7 +9,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 
 [[package]]
-name = "asset_manager"
+name = "assembly"
 version = "0.0.1"
 dependencies = [
  "cosmwasm-schema",
@@ -21,6 +21,7 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
+ "util-types",
 ]
 
 [[package]]
@@ -838,6 +839,16 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "util-types"
+version = "0.0.1"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-storage-plus 0.16.0",
+ "serde",
 ]
 
 [[package]]

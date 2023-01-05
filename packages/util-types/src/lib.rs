@@ -1,10 +1,5 @@
-use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Uint128;
-
-#[cw_serde]
-pub struct InstantiateMsg {
-    uninmp: String,
-}
 
 #[cw_serde]
 pub enum ExecuteMsg {
@@ -29,17 +24,4 @@ pub enum ExecuteMsg {
         proposal_id: u64,
         vote_option: u64,
     },
-}
-
-#[cw_serde]
-#[derive(QueryResponses)]
-pub enum QueryMsg {
-    // GetCount returns the current count as a json-encoded number
-    #[returns(GetAllContractsUnderManagementResponse)]
-    GetAllContractsUnderManagement {},
-}
-
-#[cw_serde]
-pub struct GetAllContractsUnderManagementResponse {
-    pub contract_addrs: Vec<String>,
 }

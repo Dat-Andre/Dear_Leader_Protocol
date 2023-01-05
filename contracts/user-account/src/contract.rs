@@ -53,10 +53,10 @@ pub fn execute(
         ExecuteMsg::TransferVotePower { dear_leader_addr } => {
             execute::transfer_vote_power(deps, env, info, dear_leader_addr)
         }
-        ExecuteMsg::Vote {
+        ExecuteMsg::AssemblyVote {
             proposal_id,
             vote_option,
-        } => execute::vote(deps, env, info, proposal_id, vote_option),
+        } => execute::assembly_vote(deps, env, info, proposal_id, vote_option),
     }
 }
 
@@ -275,7 +275,7 @@ pub mod execute {
             .add_message(msg))
     }
 
-    pub fn vote(
+    pub fn assembly_vote(
         deps: DepsMut,
         _env: Env,
         info: MessageInfo,

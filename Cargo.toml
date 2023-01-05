@@ -1,5 +1,5 @@
 [workspace]
-members = ["contracts/*"] # , "packages/*"
+members = ["contracts/*", "packages/*"] # 
 
 [workspace.package]
 version = "0.0.1"
@@ -54,6 +54,8 @@ cw2 = "0.16"
 schemars = "0.8.10"
 serde = { version = "1.0.145", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.31" }
+
+util-types = { path = "./packages/util-types" }
 
 #[workspace.dev-dependencies]
 #cw-multi-test = "0.15.1"

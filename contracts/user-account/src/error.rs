@@ -24,7 +24,7 @@ pub enum ContractError {
     #[error("Requested redelegation amount is too high")]
     RedelegateAmountTooHigh {},
 
-    #[error("Specified vote option is invalid")]
+    #[error("Vote option is invalid")]
     InvalidVote {},
     // Add any other custom errors you like here.
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
