@@ -37,9 +37,14 @@ pub fn execute(
             proposal_id,
             vote_option,
         } => execute::user_account_vote(deps, info, proposal_id, vote_option),
+        ExecuteMsg::DearLeaderVote {
+            proposal_id,
+            vote_option,
+        } => execute::dear_leader_vote(deps, info, proposal_id, vote_option),
         ExecuteMsg::TransferVotePower { dear_leader_addr } => {
             execute::transfer_vote_power(deps, env, info, dear_leader_addr)
         }
+        ExecuteMsg::ReclaimVotePower {} => execute::reclaim_vote_power(deps, env, info),
         ExecuteMsg::RegisterWannaBe {
             wanna_be_dear_leader_addr,
         } => execute::register_wanna_be(deps, info, wanna_be_dear_leader_addr),
@@ -99,9 +104,12 @@ pub mod execute {
             .addr_validate(&dear_leader_addr)
             .map_err(|_| ContractError::InvalidDearLeader {})?;
 
-        let dear_leader_delegators = DEAR_LEADER_BOARD
-            .load(deps.storage, dear_leader_addr.to_string())
-            .map_err(|_| ContractError::DearLeaderNotRegistered {})?;
+        /*  let dear_leader_delegators = DEAR_LEADER_BOARD
+        .load(deps.storage, dear_leader_addr.to_string())
+        .map_err(|_| ContractError::DearLeaderNotRegistered {})?; */
+        if !DEAR_LEADER_BOARD.has(deps.storage, dear_leader_addr.to_string()) {
+            return Err(ContractError::DearLeaderNotRegistered {});
+        }
 
         // check if the user_account is registered in the assembly
         let current_dear_leader = BOSS_VOTE_POWER
@@ -155,9 +163,13 @@ pub mod execute {
         info: MessageInfo,
     ) -> Result<Response, ContractError> {
         // validate that the user_account is registered in the assembly
-        let value_to_update = BOSS_VOTE_POWER
-            .load(deps.storage, info.sender.to_string())
-            .map_err(|_| ContractError::AccountNotRegistered {})?;
+        /* let value_to_update = BOSS_VOTE_POWER
+        .load(deps.storage, info.sender.to_string())
+        .map_err(|_| ContractError::AccountNotRegistered {})?; */
+
+        if !BOSS_VOTE_POWER.has(deps.storage, info.sender.to_string()) {
+            return Err(ContractError::AccountNotRegistered {});
+        }
 
         // reset the option to None, so that the user_account don't delegate his vote power
         BOSS_VOTE_POWER.save(deps.storage, info.sender.to_string(), &None)?;
@@ -177,9 +189,12 @@ pub mod execute {
         }
 
         //validate that user_account is registered in the assembly
-        let valid_user_account = BOSS_VOTE_POWER
-            .load(deps.storage, info.sender.to_string())
-            .map_err(|_| ContractError::AccountNotRegistered {})?;
+        /* let valid_user_account = BOSS_VOTE_POWER
+        .load(deps.storage, info.sender.to_string())
+        .map_err(|_| ContractError::AccountNotRegistered {})?; */
+        if !BOSS_VOTE_POWER.has(deps.storage, info.sender.to_string()) {
+            return Err(ContractError::AccountNotRegistered {});
+        }
 
         // update PROPOSAL_VOTE_HISTORY
         PROPOSAL_VOTE_HISTORY.update(
@@ -211,57 +226,57 @@ pub mod execute {
             .add_attribute("vote", vote.to_string())
             .add_message(msg))
     }
-}
 
-pub fn dear_leader_vote(
-    deps: DepsMut,
-    info: MessageInfo,
-    proposal_id: u64,
-    vote: u64,
-) -> Result<Response, ContractError> {
-    // check if vote is valid
-    if vote < 1 || vote > 4 {
-        return Err(ContractError::InvalidVote {});
-    }
+    pub fn dear_leader_vote(
+        deps: DepsMut,
+        info: MessageInfo,
+        proposal_id: u64,
+        vote: u64,
+    ) -> Result<Response, ContractError> {
+        // check if vote is valid
+        if vote < 1 || vote > 4 {
+            return Err(ContractError::InvalidVote {});
+        }
 
-    //validate that dear_leader_account is registered in the assembly and has at least one delegator
-    let valid_dear_leader_list_of_delegators = DEAR_LEADER_BOARD
-        .load(deps.storage, info.sender.to_string())
-        .map_err(|_| ContractError::DearLeaderNotRegistered {})?;
+        //validate that dear_leader_account is registered in the assembly and has at least one delegator
+        let valid_dear_leader_list_of_delegators = DEAR_LEADER_BOARD
+            .load(deps.storage, info.sender.to_string())
+            .map_err(|_| ContractError::DearLeaderNotRegistered {})?;
 
-    if valid_dear_leader_list_of_delegators.is_none() {
-        return Err(ContractError::NoVotePower {});
-    }
+        if valid_dear_leader_list_of_delegators.is_none() {
+            return Err(ContractError::NoVotePower {});
+        }
 
-    // validate that at least one delegator exists
-    // if not, return error
-    // if yes, iterate over the list of delegators (also validating he has not voted yet) and create messages
-    // prepare list to allow validate that user_account have not voted yet
-    let delegators_that_already_voted = PROPOSAL_VOTE_HISTORY
-        .may_load(deps.storage, proposal_id)?
-        .ok_or(ContractError::ProposalNotRegistered {})?;
+        // validate that at least one delegator exists
+        // if not, return error
+        // if yes, iterate over the list of delegators (also validating he has not voted yet) and create messages
+        // prepare list to allow validate that user_account have not voted yet
+        let delegators_that_already_voted = PROPOSAL_VOTE_HISTORY
+            .may_load(deps.storage, proposal_id)?
+            .ok_or(ContractError::ProposalNotRegistered {})?;
 
-    // Note: It is not possible to have a list of 0 elements
-    let msgs = valid_dear_leader_list_of_delegators
-        .unwrap()
-        .iter()
-        .filter(|addr| !delegators_that_already_voted.contains(addr))
-        .map(|addr| WasmMsg::Execute {
-            contract_addr: addr.to_string(),
-            msg: to_binary(&CommonExecuteMsg::AssemblyVote {
-                proposal_id,
-                vote_option: vote,
+        // Note: It is not possible to have a list of 0 elements
+        let msgs = valid_dear_leader_list_of_delegators
+            .unwrap()
+            .iter()
+            .filter(|addr| !delegators_that_already_voted.contains(addr))
+            .map(|addr| WasmMsg::Execute {
+                contract_addr: addr.to_string(),
+                msg: to_binary(&CommonExecuteMsg::AssemblyVote {
+                    proposal_id,
+                    vote_option: vote,
+                })
+                .unwrap(),
+                funds: vec![],
             })
-            .unwrap(),
-            funds: vec![],
-        })
-        .take(10) // TEST - HOW MANY MESSAGES CAN BE SENT IN ONE TRANSACTION?
-        .collect::<Vec<WasmMsg>>();
+            .take(10) // TEST - HOW MANY MESSAGES CAN BE SENT IN ONE TRANSACTION?
+            .collect::<Vec<WasmMsg>>();
 
-    Ok(Response::new()
-        .add_attribute("action", "vote")
-        .add_attribute("n_of_votes", msgs.len().to_string())
-        .add_messages(msgs))
+        Ok(Response::new()
+            .add_attribute("action", "vote")
+            .add_attribute("n_of_votes", msgs.len().to_string())
+            .add_messages(msgs))
+    }
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]

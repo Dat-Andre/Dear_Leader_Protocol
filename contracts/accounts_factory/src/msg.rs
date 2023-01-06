@@ -1,8 +1,6 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
 use cosmwasm_std::{Coin, Uint128};
 
-use crate::state::BalanceState;
-
 #[cw_serde]
 pub struct InstantiateMsg {
     uninmp: String,

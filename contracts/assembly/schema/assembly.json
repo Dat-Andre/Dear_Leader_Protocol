@@ -1,0 +1,105 @@
+{
+  "contract_name": "assembly",
+  "contract_version": "0.0.1",
+  "idl_version": "1.0.0",
+  "instantiate": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "InstantiateMsg",
+    "type": "object",
+    "required": [
+      "uninmp"
+    ],
+    "properties": {
+      "uninmp": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "execute": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ExecuteMsg",
+    "oneOf": [
+      {
+        "type": "object",
+        "required": [
+          "user_account_vote"
+        ],
+        "properties": {
+          "user_account_vote": {
+            "type": "object",
+            "required": [
+              "proposal_id",
+              "vote_option"
+            ],
+            "properties": {
+              "proposal_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              "vote_option": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "transfer_vote_power"
+        ],
+        "properties": {
+          "transfer_vote_power": {
+            "type": "object",
+            "required": [
+              "dear_leader_addr"
+            ],
+            "properties": {
+              "dear_leader_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "register_wanna_be"
+        ],
+        "properties": {
+          "register_wanna_be": {
+            "type": "object",
+            "required": [
+              "wanna_be_dear_leader_addr"
+            ],
+            "properties": {
+              "wanna_be_dear_leader_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    ]
+  },
+  "query": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "QueryMsg",
+    "type": "string",
+    "enum": []
+  },
+  "migrate": null,
+  "sudo": null,
+  "responses": {}
+}
