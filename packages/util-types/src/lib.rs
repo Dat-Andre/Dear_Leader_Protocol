@@ -36,6 +36,8 @@ pub enum ExecuteMsg {
     RegisterWannaBe {
         wanna_be_addr: String,
     },
+    RegisterUserAccount {},
+    UnregisterUserAccount {},
     UserAccountVote {
         proposal_id: u64,
         vote_option: u64,

@@ -1,6 +1,8 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{
+    to_binary, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response, StdResult,
+};
 use cw2::set_contract_version;
 
 use crate::error::ContractError;
@@ -9,6 +11,8 @@ use crate::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:user_acount";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+const UNDELEGATION_REPLY_ID: u64 = 0;
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
@@ -65,7 +69,9 @@ pub fn execute(
 }
 
 pub mod execute {
-    use cosmwasm_std::{Coin, DistributionMsg, GovMsg, StakingMsg, Uint128, VoteOption, WasmMsg};
+    use cosmwasm_std::{
+        Coin, DistributionMsg, GovMsg, ReplyOn, StakingMsg, SubMsg, Uint128, VoteOption, WasmMsg,
+    };
     use cw_utils::must_pay;
     use util_types::ExecuteMsg as CommonExecuteMsg;
 
@@ -75,7 +81,7 @@ pub mod execute {
 
     pub fn delegate(
         deps: DepsMut,
-        _env: Env,
+        env: Env,
         info: MessageInfo,
         validator_addr: String,
     ) -> Result<Response, ContractError> {
@@ -99,12 +105,35 @@ pub mod execute {
             amount: info.funds[0].clone(),
         };
 
-        Ok(Response::new()
-            .add_attribute("action", "delegate")
-            .add_attribute("boss", info.sender.to_string())
-            .add_attribute("amount", sent_token.to_string())
-            .add_attribute("to", validator_addr)
-            .add_message(msg))
+        // check if it is first delegation
+        let is_first_delegation = deps
+            .querier
+            .query_all_delegations(env.contract.address)?
+            .is_empty();
+
+        // if it is first delegation, create msg to register vote power in the assembly
+        if is_first_delegation {
+            let register_msg = WasmMsg::Execute {
+                contract_addr: ASSEMBLY_ADDR.load(deps.storage)?.to_string(),
+                msg: to_binary(&CommonExecuteMsg::RegisterUserAccount {})?,
+                funds: vec![],
+            };
+
+            return Ok(Response::new()
+                .add_attribute("action", "delegate")
+                .add_attribute("boss", info.sender.to_string())
+                .add_attribute("amount", sent_token.to_string())
+                .add_attribute("to", validator_addr)
+                .add_message(msg)
+                .add_message(register_msg));
+        } else {
+            Ok(Response::new()
+                .add_attribute("action", "delegate")
+                .add_attribute("boss", info.sender.to_string())
+                .add_attribute("amount", sent_token.to_string())
+                .add_attribute("to", validator_addr)
+                .add_message(msg))
+        }
     }
 
     pub fn undelegate(
@@ -141,12 +170,15 @@ pub mod execute {
             },
         };
 
+        // add reply on sucess, so we can check if there is no delegation left, to unregister vote power in the assembly
+        let sub_msg: SubMsg = SubMsg::reply_on_success(msg, UNDELEGATION_REPLY_ID);
+
         Ok(Response::new()
             .add_attribute("action", "undelegate")
             .add_attribute("boss", info.sender.to_string())
             .add_attribute("amount", amount.to_string())
             .add_attribute("from_validator", validator_addr)
-            .add_message(msg))
+            .add_submessage(sub_msg))
     }
 
     pub fn undelegate_all(
@@ -158,6 +190,10 @@ pub mod execute {
         validate_boss(deps.as_ref(), &info)?;
         // get all delegations
         let delegations = deps.querier.query_all_delegations(env.contract.address)?;
+
+        if delegations.is_empty() {
+            return Err(ContractError::NoDelegation {});
+        }
         // create undelegate message for each delegation
         let msgs = delegations
             .iter()
@@ -169,12 +205,20 @@ pub mod execute {
                 },
             })
             .collect::<Vec<StakingMsg>>();
-        // return response
+
+        // create message to unregister vote power in the assembly
+        let msg = WasmMsg::Execute {
+            contract_addr: ASSEMBLY_ADDR.load(deps.storage)?.to_string(),
+            msg: to_binary(&CommonExecuteMsg::UnregisterUserAccount {})?,
+            funds: vec![],
+        };
 
         Ok(Response::new()
             .add_attribute("action", "undelegate")
             .add_attribute("boss", info.sender.to_string())
-            .add_messages(msgs))
+            .add_messages(msgs)
+            .add_message(msg))
+        // .add_submessage(submessage))
     }
 
     pub fn claim(deps: DepsMut, env: Env, info: MessageInfo) -> Result<Response, ContractError> {
@@ -355,6 +399,47 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::GetAllContractsUnderManagement {} => {
             to_binary(&query::get_all_contracts_under_management(deps)?)
+        }
+    }
+}
+
+#[cfg_attr(not(feature = "library"), entry_point)]
+pub fn reply(deps: DepsMut, env: Env, msg: Reply) -> Result<Response, ContractError> {
+    match msg.id {
+        UNDELEGATION_REPLY_ID => reply::unregister_vote_if_last_delegation(deps, env, msg),
+        _ => Err(ContractError::UnknownReplyIdCommon {}),
+    }
+}
+
+pub mod reply {
+    use cosmwasm_std::WasmMsg;
+    use util_types::ExecuteMsg as CommonExecuteMsg;
+
+    use crate::state::ASSEMBLY_ADDR;
+
+    use super::*;
+
+    pub fn unregister_vote_if_last_delegation(
+        deps: DepsMut,
+        env: Env,
+        msg: Reply,
+    ) -> Result<Response, ContractError> {
+        let delegations = deps.querier.query_all_delegations(env.contract.address)?;
+
+        // if there are no more delegations, send message to Assembly to unregister the user account
+        if delegations.is_empty() {
+            // create message to the Assembly
+            let msg = WasmMsg::Execute {
+                contract_addr: ASSEMBLY_ADDR.load(deps.storage)?,
+                msg: to_binary(&CommonExecuteMsg::UnregisterUserAccount {})?,
+                funds: vec![],
+            };
+
+            Ok(Response::new()
+                .add_attribute("action", "unregister_vote_on_reply")
+                .add_message(msg))
+        } else {
+            Ok(Response::default())
         }
     }
 }

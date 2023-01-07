@@ -15,7 +15,7 @@ const CONTRACT_NAME: &str = "crates.io:accounts_factory";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 const USER_ACCOUNT_REPLY_ID: u64 = 0;
-const DEAR_LEADER_ACCOUNT_REPLY_ID: u64 = 0;
+const DEAR_LEADER_ACCOUNT_REPLY_ID: u64 = 1;
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(

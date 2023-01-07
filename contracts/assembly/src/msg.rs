@@ -11,7 +11,9 @@ pub enum ExecuteMsg {
     DearLeaderVote { proposal_id: u64, vote_option: u64 },
     TransferVotePower { dear_leader_addr: String },
     ReclaimVotePower {},
-    RegisterWannaBe { wanna_be_dear_leader_addr: String },
+    RegisterDearLeader { new_dear_leader_addr: String },
+    RegisterUserAccount {},
+    UnregisterUserAccount {},
 }
 
 #[cw_serde]

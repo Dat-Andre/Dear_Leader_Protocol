@@ -45,9 +45,11 @@ pub fn execute(
             execute::transfer_vote_power(deps, env, info, dear_leader_addr)
         }
         ExecuteMsg::ReclaimVotePower {} => execute::reclaim_vote_power(deps, env, info),
-        ExecuteMsg::RegisterWannaBe {
-            wanna_be_dear_leader_addr,
-        } => execute::register_wanna_be(deps, info, wanna_be_dear_leader_addr),
+        ExecuteMsg::RegisterDearLeader {
+            new_dear_leader_addr,
+        } => execute::register_new_dear_leader(deps, info, new_dear_leader_addr),
+        ExecuteMsg::RegisterUserAccount {} => execute::register_user_account(deps, info),
+        ExecuteMsg::UnregisterUserAccount {} => execute::unregister_user_account(deps, info),
     }
 }
 
@@ -61,8 +63,47 @@ pub mod execute {
 
     use super::*;
 
+    pub fn unregister_user_account(
+        deps: DepsMut,
+        info: MessageInfo,
+    ) -> Result<Response, ContractError> {
+        // check if user accout is registered, and if so, unregister it
+        BOSS_VOTE_POWER.update(deps.storage, info.sender.to_string(), |vote_power| {
+            if let Some(_) = vote_power {
+                // unregister account
+                Ok(None)
+            } else {
+                return Err(ContractError::AccountNotRegistered {});
+            }
+        })?;
+
+        Ok(Response::default()
+            .add_attribute("action", "unregister_user_account")
+            .add_attribute("user_account", info.sender.to_string()))
+    }
+
+    pub fn register_user_account(
+        deps: DepsMut,
+        info: MessageInfo,
+    ) -> Result<Response, ContractError> {
+        // make sure the user account is NOT already registered
+        // register new user account
+        BOSS_VOTE_POWER.update(deps.storage, info.sender.to_string(), |vote_power| {
+            if let None = vote_power {
+                // register account
+                Ok(None)
+            } else {
+                return Err(ContractError::UserAccountAlreadyRegister {});
+            }
+        })?;
+
+        Ok(Response::default()
+            .add_attribute("action", "register_user_account")
+            .add_attribute("user_account", info.sender.to_string()))
+    }
+
     // When Instantiating the new dear_leader_account contract, it should generate a message to register itself in this contract as a dear_leader
-    pub fn register_wanna_be(
+    pub fn register_new_dear_leader(
         deps: DepsMut,
         info: MessageInfo,
         new_dear_leader_addr: String,

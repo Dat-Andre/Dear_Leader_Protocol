@@ -36,6 +36,9 @@ pub enum ContractError {
     #[error("Proposal was not registered yet")]
     ProposalNotRegistered {},
 
+    #[error("The vote power for this user account is already registered")]
+    UserAccountAlreadyRegister {},
+
     #[error("There is a bug somehere")]
     InternalErrorInLogic {},
     // Add any other custom errors you like here.
