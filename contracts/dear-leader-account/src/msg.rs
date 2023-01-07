@@ -1,15 +1,13 @@
 use cosmwasm_schema::{cw_serde, QueryResponses};
-use cosmwasm_std::{Coin, Uint128};
 
 #[cw_serde]
 pub struct InstantiateMsg {
-    uninmp: String,
+    pub assembly_addr: String,
 }
 
 #[cw_serde]
 pub enum ExecuteMsg {
-    CreateUserAccount {},
-    CreateDearLeaderAccount {},
+    Vote { proposal_id: u64, vote_option: u64 },
 }
 
 #[cw_serde]

@@ -1,5 +1,6 @@
 use cosmwasm_schema::cw_serde;
 use cosmwasm_std::Uint128;
+use thiserror::Error;
 
 #[cw_serde]
 pub enum ExecuteMsg {
@@ -24,4 +25,33 @@ pub enum ExecuteMsg {
         proposal_id: u64,
         vote_option: u64,
     },
+    Vote {
+        proposal_id: u64,
+        vote_option: u64,
+    },
+    DearLeaderVote {
+        proposal_id: u64,
+        vote_option: u64,
+    },
+    RegisterWannaBe {
+        wanna_be_addr: String,
+    },
+    UserAccountVote {
+        proposal_id: u64,
+        vote_option: u64,
+    },
+}
+
+#[cw_serde]
+pub enum InstantiateMsg {
+    InstantiateUserAccountMsg {},
+}
+
+#[derive(Error, Debug)]
+pub enum ContractError {
+    #[error("There is a bug somehere")]
+    InternalErrorInLogicCommon {},
+
+    #[error("Reply id not recognized")]
+    UnknownReplyIdCommon {},
 }

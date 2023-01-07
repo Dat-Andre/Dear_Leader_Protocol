@@ -57,14 +57,19 @@ pub fn execute(
             proposal_id,
             vote_option,
         } => execute::assembly_vote(deps, env, info, proposal_id, vote_option),
+        ExecuteMsg::Vote {
+            proposal_id,
+            vote_option,
+        } => execute::vote(deps, env, info, proposal_id, vote_option),
     }
 }
 
 pub mod execute {
     use cosmwasm_std::{Coin, DistributionMsg, GovMsg, StakingMsg, Uint128, VoteOption, WasmMsg};
     use cw_utils::must_pay;
+    use util_types::ExecuteMsg as CommonExecuteMsg;
 
-    use crate::state::{ASSEMBLY_ADDR, BOSS_ADDR, DEAR_LEADER_ADDR};
+    use crate::state::{ASSEMBLY_ADDR, BOSS_ADDR};
 
     use super::*;
 
@@ -256,7 +261,7 @@ pub mod execute {
             .addr_validate(&dear_leader_addr)
             .map_err(|_| ContractError::InvalidAddr {})?;
 
-        DEAR_LEADER_ADDR.save(deps.storage, &valid_dear_leader_addr.to_string())?;
+        // NOT NEEDED -> DEAR_LEADER_ADDR.save(deps.storage, &valid_dear_leader_addr.to_string())?;
 
         let assembly_addr = ASSEMBLY_ADDR.load(deps.storage)?;
 
@@ -300,6 +305,31 @@ pub mod execute {
         Ok(Response::new()
             .add_attribute("action", "vote")
             // .add_attribute("dear_leader_addr", dear_leader_addr)
+            .add_message(msg))
+    }
+
+    pub fn vote(
+        deps: DepsMut,
+        _env: Env,
+        info: MessageInfo,
+        proposal_id: u64,
+        vote: u64,
+    ) -> Result<Response, ContractError> {
+        // confirm boss is calling
+        validate_boss(deps.as_ref(), &info)?;
+
+        // create vote message to the Assembly
+        let msg = WasmMsg::Execute {
+            contract_addr: ASSEMBLY_ADDR.load(deps.storage)?,
+            msg: to_binary(&CommonExecuteMsg::Vote {
+                proposal_id,
+                vote_option: vote,
+            })?,
+            funds: vec![],
+        };
+
+        Ok(Response::new()
+            .add_attribute("action", "vote")
             .add_message(msg))
     }
 

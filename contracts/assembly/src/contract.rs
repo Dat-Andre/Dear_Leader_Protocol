@@ -55,41 +55,38 @@ pub mod execute {
 
     use cosmwasm_std::WasmMsg;
 
-    use crate::state::{BOSS_VOTE_POWER, DEAR_LEADER_BOARD, PROPOSAL_VOTE_HISTORY};
+    use crate::state::{
+        BOSS_VOTE_POWER, DEAR_LEADER_ACCOUNT_FACTORY, DEAR_LEADER_BOARD, PROPOSAL_VOTE_HISTORY,
+    };
 
     use super::*;
 
+    // When Instantiating the new dear_leader_account contract, it should generate a message to register itself in this contract as a dear_leader
     pub fn register_wanna_be(
         deps: DepsMut,
         info: MessageInfo,
-        wanna_be_dear_leader_addr: String,
+        new_dear_leader_addr: String,
     ) -> Result<Response, ContractError> {
-        // When Instantiating the WannaBe contract, it should generate a message to register itself in this contract as a dear_leader
+        //check if the sender is the dear_leader_account_factory
+        let dear_leader_account_factory = DEAR_LEADER_ACCOUNT_FACTORY.load(deps.storage)?;
 
-        // check if wanna_be_dear_leader_addr is a valid address
-        let wanna_be_dear_leader_addr = deps
-            .api
-            .addr_validate(&wanna_be_dear_leader_addr)
-            .map_err(|_| ContractError::InvalidAddr {})?;
+        if dear_leader_account_factory != info.sender {
+            return Err(ContractError::Unauthorized {});
+        }
 
         // check if dear leader is already registered, if not, register him, if yes return error
-
-        DEAR_LEADER_BOARD.update(
-            deps.storage,
-            wanna_be_dear_leader_addr.to_string(),
-            |addrs| {
-                if let None = addrs {
-                    // register account
-                    Ok(None)
-                } else {
-                    return Err(ContractError::AlreadyWannaBeDearLeader {});
-                }
-            },
-        )?;
+        DEAR_LEADER_BOARD.update(deps.storage, new_dear_leader_addr.to_string(), |addrs| {
+            if let None = addrs {
+                // register account
+                Ok(None)
+            } else {
+                return Err(ContractError::AlreadyIsADearLeader {});
+            }
+        })?;
 
         Ok(Response::new()
-            .add_attribute("action", "wanna_be_dear_leader_addr")
-            .add_attribute("new_dear_leader", wanna_be_dear_leader_addr))
+            .add_attribute("action", "register_dear_leader_addr")
+            .add_attribute("dear_leader_account_addr", new_dear_leader_addr))
     }
 
     pub fn transfer_vote_power(
@@ -215,8 +212,7 @@ pub mod execute {
             msg: to_binary(&CommonExecuteMsg::AssemblyVote {
                 proposal_id,
                 vote_option: vote,
-            })
-            .unwrap(),
+            })?,
             funds: vec![],
         };
 

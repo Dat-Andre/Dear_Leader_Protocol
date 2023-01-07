@@ -1,6 +1,6 @@
 [package]
-name = "accounts-factory"
-description = "Factory and Keeper of Accounts"
+name = "dear-leader-account"
+description = "Dear Leader Account contract"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

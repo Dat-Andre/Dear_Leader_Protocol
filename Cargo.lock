@@ -15,6 +15,7 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
+ "util-types",
 ]
 
 [[package]]
@@ -319,6 +320,22 @@ dependencies = [
  "cw-storage-plus 0.16.0",
  "schemars",
  "serde",
+]
+
+[[package]]
+name = "dear-leader-account"
+version = "0.0.1"
+dependencies = [
+ "cosmwasm-schema",
+ "cosmwasm-std",
+ "cw-multi-test",
+ "cw-storage-plus 0.16.0",
+ "cw-utils 0.16.0",
+ "cw2 0.16.0",
+ "schemars",
+ "serde",
+ "thiserror",
+ "util-types",
 ]
 
 [[package]]
@@ -839,6 +856,7 @@ dependencies = [
  "schemars",
  "serde",
  "thiserror",
+ "util-types",
 ]
 
 [[package]]
@@ -849,6 +867,7 @@ dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 0.16.0",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

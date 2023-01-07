@@ -8,3 +8,6 @@ pub const BOSS_VOTE_POWER: Map<String, Option<String>> = Map::new("boss_vote_pow
 
 //relation between proposals and user_accounts
 pub const PROPOSAL_VOTE_HISTORY: Map<u64, Vec<String>> = Map::new("proposal_vote_history");
+
+// address of the dear_leader_account factory
+pub const DEAR_LEADER_ACCOUNT_FACTORY: Item<String> = Item::new("dear_leader_account_factory");

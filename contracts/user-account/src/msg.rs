@@ -29,6 +29,10 @@ pub enum ExecuteMsg {
         proposal_id: u64,
         vote_option: u64,
     },
+    Vote {
+        proposal_id: u64,
+        vote_option: u64,
+    },
 }
 
 #[cw_serde]

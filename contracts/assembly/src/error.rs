@@ -28,7 +28,7 @@ pub enum ContractError {
     InvalidAddr {},
 
     #[error("This address is already registered as a wanna be")]
-    AlreadyWannaBeDearLeader {},
+    AlreadyIsADearLeader {},
 
     #[error("User account not registered")]
     AccountNotRegistered {},
