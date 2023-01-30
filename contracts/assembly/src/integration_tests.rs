@@ -1,71 +1,85 @@
 #[cfg(test)]
 mod tests {
-    /* use crate::helpers::CwTemplateContract;
-    use crate::msg::InstantiateMsg;
-    use cosmwasm_std::{Addr, Coin, Empty, Uint128};
-    use cw_multi_test::{App, AppBuilder, Contract, ContractWrapper, Executor};
+    use std::borrow::BorrowMut;
 
-    pub fn contract_template() -> Box<dyn Contract<Empty>> {
-        let contract = ContractWrapper::new(
-            crate::contract::execute,
-            crate::contract::instantiate,
-            crate::contract::query,
-        );
+    use cosmwasm_std::{coins, Addr, Coin, Empty, Uint128};
+    use cw_multi_test::{App, Contract, ContractWrapper, Executor};
+
+    use crate::{
+        contract::{execute, instantiate, query},
+        msg::{ExecuteMsg, GetConfigResponse, InstantiateMsg},
+    };
+
+    const ADMIN: &str = "admin";
+    const ACCOUNT_FACTORY: &str = "account_factory";
+    const USED_DENOM: &str = "Juno";
+
+    fn assembly_contract() -> Box<dyn Contract<Empty>> {
+        let contract = ContractWrapper::new(execute, instantiate, query);
         Box::new(contract)
     }
 
-    const USER: &str = "USER";
-    const ADMIN: &str = "ADMIN";
-    const NATIVE_DENOM: &str = "denom";
-
-    fn mock_app() -> App {
-        AppBuilder::new().build(|router, _, storage| {
-            router
-                .bank
-                .init_balance(
-                    storage,
-                    &Addr::unchecked(USER),
-                    vec![Coin {
-                        denom: NATIVE_DENOM.to_string(),
-                        amount: Uint128::new(1),
-                    }],
-                )
-                .unwrap();
-        })
+    fn bank_balance(router: &mut App, addr: &Addr, denom: String) -> Coin {
+        router
+            .wrap()
+            .query_balance(addr.to_string(), denom)
+            .unwrap()
     }
 
-    fn proper_instantiate() -> (App, CwTemplateContract) {
-        let mut app = mock_app();
-        let cw_template_id = app.store_code(contract_template());
+    #[test]
+    fn test_instantiate_and_update_on_config() {
+        let mut app = App::default();
 
-        let msg = InstantiateMsg { count: 1i32 };
-        let cw_template_contract_addr = app
+        // set initial balances for owner and check balance
+        let funds = coins(20000, USED_DENOM);
+        app.borrow_mut().init_modules(|router, _, storage| {
+            router
+                .bank
+                .init_balance(storage, &Addr::unchecked(ADMIN), funds.clone())
+                .unwrap()
+        });
+        let balance: Coin = bank_balance(&mut app, &Addr::unchecked(ADMIN), USED_DENOM.to_string());
+        assert_eq!(balance.amount, Uint128::new(20000));
+
+        // store and instantiate contract
+        let assembly_code_id = app.store_code(assembly_contract());
+        let assembly = app
             .instantiate_contract(
-                cw_template_id,
+                assembly_code_id,
                 Addr::unchecked(ADMIN),
-                &msg,
+                &InstantiateMsg {},
                 &[],
-                "test",
+                "assembly",
                 None,
             )
             .unwrap();
 
-        let cw_template_contract = CwTemplateContract(cw_template_contract_addr);
+        // check that admin is set properly and the remaining configs are empty
+        let config: GetConfigResponse = app
+            .wrap()
+            .query_wasm_smart(&assembly, &&crate::msg::QueryMsg::GetConfig {})
+            .unwrap();
 
-        (app, cw_template_contract)
+        assert_eq!(config.admin_addr, ADMIN);
+
+        // update account factory address
+        app.execute_contract(
+            Addr::unchecked(ADMIN),
+            assembly.clone(),
+            &ExecuteMsg::SetAccountFactoryAddr {
+                account_factory_addr: ACCOUNT_FACTORY.to_string(),
+            },
+            &[],
+        )
+        .unwrap();
+
+        // check that account_factory is set properly
+        let config: GetConfigResponse = app
+            .wrap()
+            .query_wasm_smart(assembly, &&crate::msg::QueryMsg::GetConfig {})
+            .unwrap();
+
+        assert_eq!(config.admin_addr, ADMIN);
+        assert_eq!(config.accounts_factory_addr, ACCOUNT_FACTORY);
     }
-
-    mod count {
-        use super::*;
-        use crate::msg::ExecuteMsg;
-
-        #[test]
-        fn count() {
-            let (mut app, cw_template_contract) = proper_instantiate();
-
-            let msg = ExecuteMsg::Increment {};
-            let cosmos_msg = cw_template_contract.call(msg).unwrap();
-            app.execute(Addr::unchecked(USER), cosmos_msg).unwrap();
-        }
-    } */
 }

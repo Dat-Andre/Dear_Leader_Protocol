@@ -26,7 +26,10 @@ pub fn instantiate(
     CONFIG.save(deps.storage, &config)?;
 
     ASSEMBLY_ADDR.save(deps.storage, &msg.assembly_addr)?;
-    unimplemented!()
+
+    Ok(Response::new()
+        .add_attribute("action", "instantiate_dear_leader_account")
+        .add_attribute("owner", info.sender.to_string()))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -54,7 +57,7 @@ pub mod execute {
 
     pub fn vote(
         deps: DepsMut,
-        env: Env,
+        _env: Env,
         info: MessageInfo,
         proposal_id: u64,
         vote_option: u64,
@@ -83,53 +86,27 @@ pub mod execute {
         }
         Ok(())
     }
-
-    /* pub fn validate_factory(deps: Deps, info: &MessageInfo) -> Result<(), ContractError> {
-        let factory = ACCOUNTS_FACTORY_ADDR.load(deps.storage)?;
-        if info.sender != factory {
-            return Err(ContractError::Unauthorized {});
-        }
-        Ok(())
-    } */
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::GetAllContractsUnderManagement {} => {
-            to_binary(&query::get_all_contracts_under_management(deps)?)
-        }
+        QueryMsg::GetOwnerAddr {} => to_binary(&query::get_owner_addr(deps)?),
     }
 }
 
 pub mod query {
 
-    use crate::msg::GetAllContractsUnderManagementResponse;
+    use crate::msg::GetOwnerAddrResponse;
 
     use super::*;
 
-    pub fn get_all_contracts_under_management(
-        _deps: Deps,
-    ) -> StdResult<GetAllContractsUnderManagementResponse> {
-        unimplemented!()
+    pub fn get_owner_addr(deps: Deps) -> StdResult<Binary> {
+        let owner_addr = CONFIG.load(deps.storage)?.owner;
+        let response = GetOwnerAddrResponse { owner_addr };
+        to_binary(&response)
     }
 }
 
 #[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_1() {
-        unimplemented!()
-    }
-
-    #[test]
-    fn test_2() {
-        unimplemented!()
-    }
-
-    #[test]
-    fn test_3() {
-        unimplemented!()
-    }
-}
+mod tests {}

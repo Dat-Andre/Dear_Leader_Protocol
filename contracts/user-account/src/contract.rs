@@ -65,12 +65,13 @@ pub fn execute(
             proposal_id,
             vote_option,
         } => execute::vote(deps, env, info, proposal_id, vote_option),
+        ExecuteMsg::Withdraw { amount } => execute::withdraw(deps, info, amount),
     }
 }
 
 pub mod execute {
     use cosmwasm_std::{
-        Coin, DistributionMsg, GovMsg, ReplyOn, StakingMsg, SubMsg, Uint128, VoteOption, WasmMsg,
+        BankMsg, Coin, DistributionMsg, GovMsg, StakingMsg, SubMsg, Uint128, VoteOption, WasmMsg,
     };
     use cw_utils::must_pay;
     use util_types::ExecuteMsg as CommonExecuteMsg;
@@ -114,18 +115,18 @@ pub mod execute {
         // if it is first delegation, create msg to register vote power in the assembly
         if is_first_delegation {
             let register_msg = WasmMsg::Execute {
-                contract_addr: ASSEMBLY_ADDR.load(deps.storage)?.to_string(),
+                contract_addr: ASSEMBLY_ADDR.load(deps.storage)?,
                 msg: to_binary(&CommonExecuteMsg::RegisterUserAccount {})?,
                 funds: vec![],
             };
 
-            return Ok(Response::new()
+            Ok(Response::new()
                 .add_attribute("action", "delegate")
                 .add_attribute("boss", info.sender.to_string())
                 .add_attribute("amount", sent_token.to_string())
                 .add_attribute("to", validator_addr)
                 .add_message(msg)
-                .add_message(register_msg));
+                .add_message(register_msg))
         } else {
             Ok(Response::new()
                 .add_attribute("action", "delegate")
@@ -208,7 +209,7 @@ pub mod execute {
 
         // create message to unregister vote power in the assembly
         let msg = WasmMsg::Execute {
-            contract_addr: ASSEMBLY_ADDR.load(deps.storage)?.to_string(),
+            contract_addr: ASSEMBLY_ADDR.load(deps.storage)?,
             msg: to_binary(&CommonExecuteMsg::UnregisterUserAccount {})?,
             funds: vec![],
         };
@@ -377,6 +378,29 @@ pub mod execute {
             .add_message(msg))
     }
 
+    pub fn withdraw(
+        deps: DepsMut,
+        info: MessageInfo,
+        amount: Uint128,
+    ) -> Result<Response, ContractError> {
+        // confirm boss is calling
+        validate_boss(deps.as_ref(), &info)?;
+
+        // create withdraw message
+        let msg = BankMsg::Send {
+            to_address: BOSS_ADDR.load(deps.storage)?,
+            amount: vec![Coin {
+                denom: deps.querier.query_bonded_denom()?,
+                amount,
+            }],
+        };
+
+        Ok(Response::new()
+            .add_attribute("action", "withdraw")
+            .add_attribute("amount", amount.to_string())
+            .add_message(msg))
+    }
+
     fn validate_boss(deps: Deps, info: &MessageInfo) -> Result<(), ContractError> {
         let boss = BOSS_ADDR.load(deps.storage)?;
         if info.sender != boss {
@@ -395,12 +419,8 @@ pub mod execute {
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
-    match msg {
-        QueryMsg::GetAllContractsUnderManagement {} => {
-            to_binary(&query::get_all_contracts_under_management(deps)?)
-        }
-    }
+pub fn query(_deps: Deps, _env: Env, _msg: QueryMsg) -> StdResult<Binary> {
+    unimplemented!()
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -422,7 +442,7 @@ pub mod reply {
     pub fn unregister_vote_if_last_delegation(
         deps: DepsMut,
         env: Env,
-        msg: Reply,
+        _msg: Reply,
     ) -> Result<Response, ContractError> {
         let delegations = deps.querier.query_all_delegations(env.contract.address)?;
 
@@ -444,34 +464,5 @@ pub mod reply {
     }
 }
 
-pub mod query {
-
-    use crate::msg::GetAllContractsUnderManagementResponse;
-
-    use super::*;
-
-    pub fn get_all_contracts_under_management(
-        _deps: Deps,
-    ) -> StdResult<GetAllContractsUnderManagementResponse> {
-        unimplemented!()
-    }
-}
-
 #[cfg(test)]
-mod tests {
-
-    #[test]
-    fn test_1() {
-        unimplemented!()
-    }
-
-    #[test]
-    fn test_2() {
-        unimplemented!()
-    }
-
-    #[test]
-    fn test_3() {
-        unimplemented!()
-    }
-}
+mod tests {}

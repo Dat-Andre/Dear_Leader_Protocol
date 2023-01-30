@@ -170,6 +170,56 @@
           }
         },
         "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "vote"
+        ],
+        "properties": {
+          "vote": {
+            "type": "object",
+            "required": [
+              "proposal_id",
+              "vote_option"
+            ],
+            "properties": {
+              "proposal_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              "vote_option": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "withdraw"
+        ],
+        "properties": {
+          "withdraw": {
+            "type": "object",
+            "required": [
+              "amount"
+            ],
+            "properties": {
+              "amount": {
+                "$ref": "#/definitions/Uint128"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
       }
     ],
     "definitions": {
@@ -182,41 +232,10 @@
   "query": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "QueryMsg",
-    "oneOf": [
-      {
-        "type": "object",
-        "required": [
-          "get_all_contracts_under_management"
-        ],
-        "properties": {
-          "get_all_contracts_under_management": {
-            "type": "object",
-            "additionalProperties": false
-          }
-        },
-        "additionalProperties": false
-      }
-    ]
+    "type": "string",
+    "enum": []
   },
   "migrate": null,
   "sudo": null,
-  "responses": {
-    "get_all_contracts_under_management": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "GetAllContractsUnderManagementResponse",
-      "type": "object",
-      "required": [
-        "contract_addrs"
-      ],
-      "properties": {
-        "contract_addrs": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
-    }
-  }
+  "responses": {}
 }

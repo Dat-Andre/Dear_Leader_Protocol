@@ -13,12 +13,11 @@ pub enum ExecuteMsg {
 #[cw_serde]
 #[derive(QueryResponses)]
 pub enum QueryMsg {
-    // GetCount returns the current count as a json-encoded number
-    #[returns(GetAllContractsUnderManagementResponse)]
-    GetAllContractsUnderManagement {},
+    #[returns(GetOwnerAddrResponse)]
+    GetOwnerAddr {},
 }
 
 #[cw_serde]
-pub struct GetAllContractsUnderManagementResponse {
-    pub contract_addrs: Vec<String>,
+pub struct GetOwnerAddrResponse {
+    pub owner_addr: String,
 }

@@ -19,8 +19,23 @@ pub enum ContractError {
     #[error("Dear Leader Account already exists")]
     DearLeaderAccountAlreadyExists,
 
-    #[error("Account already exists")]
+    #[error("Reply ID not recognized")]
     UnknownReplyIdCommon {},
+
+    #[error("User Account not found")]
+    UserAccountAddrNotFound {},
+
+    #[error("Dear Leader Account not found")]
+    DearLeaderAccountAddrNotFound,
+
+    #[error("User account code ID not set")]
+    UserAccountCodeIdNotSet,
+
+    #[error("Dear leader account code ID not set")]
+    DearLeaderAccountsCodeIdNotSet,
+
+    #[error("Assembly addr not set")]
+    AssemblyAddrNotSet,
     // Add any other custom errors you like here.
     // Look at https://docs.rs/thiserror/1.0.21/thiserror/ for details.
 }

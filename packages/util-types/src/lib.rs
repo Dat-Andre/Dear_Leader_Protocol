@@ -33,8 +33,8 @@ pub enum ExecuteMsg {
         proposal_id: u64,
         vote_option: u64,
     },
-    RegisterWannaBe {
-        wanna_be_addr: String,
+    RegisterDearLeader {
+        new_dear_leader_addr: String,
     },
     RegisterUserAccount {},
     UnregisterUserAccount {},
@@ -47,6 +47,7 @@ pub enum ExecuteMsg {
 #[cw_serde]
 pub enum InstantiateMsg {
     InstantiateUserAccountMsg {},
+    InstatiateDearLeaderAccount {},
 }
 
 #[derive(Error, Debug)]

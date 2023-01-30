@@ -6,14 +6,6 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "InstantiateMsg",
     "type": "object",
-    "required": [
-      "uninmp"
-    ],
-    "properties": {
-      "uninmp": {
-        "type": "string"
-      }
-    },
     "additionalProperties": false
   },
   "execute": {
@@ -27,6 +19,35 @@
         ],
         "properties": {
           "user_account_vote": {
+            "type": "object",
+            "required": [
+              "proposal_id",
+              "vote_option"
+            ],
+            "properties": {
+              "proposal_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              "vote_option": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "dear_leader_vote"
+        ],
+        "properties": {
+          "dear_leader_vote": {
             "type": "object",
             "required": [
               "proposal_id",
@@ -73,16 +94,76 @@
       {
         "type": "object",
         "required": [
-          "register_wanna_be"
+          "reclaim_vote_power"
         ],
         "properties": {
-          "register_wanna_be": {
+          "reclaim_vote_power": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "register_dear_leader"
+        ],
+        "properties": {
+          "register_dear_leader": {
             "type": "object",
             "required": [
-              "wanna_be_dear_leader_addr"
+              "new_dear_leader_addr"
             ],
             "properties": {
-              "wanna_be_dear_leader_addr": {
+              "new_dear_leader_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "register_user_account"
+        ],
+        "properties": {
+          "register_user_account": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "unregister_user_account"
+        ],
+        "properties": {
+          "unregister_user_account": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "set_account_factory_addr"
+        ],
+        "properties": {
+          "set_account_factory_addr": {
+            "type": "object",
+            "required": [
+              "account_factory_addr"
+            ],
+            "properties": {
+              "account_factory_addr": {
                 "type": "string"
               }
             },
@@ -96,10 +177,156 @@
   "query": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "QueryMsg",
-    "type": "string",
-    "enum": []
+    "oneOf": [
+      {
+        "type": "object",
+        "required": [
+          "get_dear_leader_delegatores"
+        ],
+        "properties": {
+          "get_dear_leader_delegatores": {
+            "type": "object",
+            "required": [
+              "dear_leader_addr"
+            ],
+            "properties": {
+              "dear_leader_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "get_user_account_leader"
+        ],
+        "properties": {
+          "get_user_account_leader": {
+            "type": "object",
+            "required": [
+              "user_account_addr"
+            ],
+            "properties": {
+              "user_account_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "get_vote_proposal_by_user_and_prop"
+        ],
+        "properties": {
+          "get_vote_proposal_by_user_and_prop": {
+            "type": "object",
+            "required": [
+              "proposal_id",
+              "user_account_addr"
+            ],
+            "properties": {
+              "proposal_id": {
+                "type": "integer",
+                "format": "uint64",
+                "minimum": 0.0
+              },
+              "user_account_addr": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "required": [
+          "get_config"
+        ],
+        "properties": {
+          "get_config": {
+            "type": "object",
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    ]
   },
   "migrate": null,
   "sudo": null,
-  "responses": {}
+  "responses": {
+    "get_config": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GetConfigResponse",
+      "type": "object",
+      "required": [
+        "accounts_factory_addr",
+        "admin_addr"
+      ],
+      "properties": {
+        "accounts_factory_addr": {
+          "type": "string"
+        },
+        "admin_addr": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "get_dear_leader_delegatores": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GetDearLeaderDelegatoresResponse",
+      "type": "object",
+      "properties": {
+        "delegatores_list": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "get_user_account_leader": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GetUserAccountLeaderResponse",
+      "type": "object",
+      "properties": {
+        "dear_leader_addr": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "get_vote_proposal_by_user_and_prop": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GetVoteProposalByUserAndPropResponse",
+      "type": "object",
+      "required": [
+        "voted"
+      ],
+      "properties": {
+        "voted": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

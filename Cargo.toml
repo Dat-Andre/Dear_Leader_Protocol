@@ -51,11 +51,13 @@ cosmwasm-storage = "1.1.9"
 cw-storage-plus = "0.16"
 cw-utils = "0.16"
 cw2 = "0.16"
+cw20 = "0.16"
 schemars = "0.8.10"
 serde = { version = "1.0.145", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.31" }
 
 util-types = { path = "./packages/util-types" }
+cw-paginate = { path = "./packages/cw-paginate" }
 
 #[workspace.dev-dependencies]
 #cw-multi-test = "0.15.1"

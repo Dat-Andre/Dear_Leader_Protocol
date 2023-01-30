@@ -25,6 +25,7 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 schemars = { workspace = true }
 util-types = { workspace = true }
+cw-paginate = { workspace = true }
 
 [dev-dependencies]
 cw-multi-test = "0.15.1"

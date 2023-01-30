@@ -33,17 +33,11 @@ pub enum ExecuteMsg {
         proposal_id: u64,
         vote_option: u64,
     },
+    Withdraw {
+        amount: Uint128,
+    },
 }
 
 #[cw_serde]
 #[derive(QueryResponses)]
-pub enum QueryMsg {
-    // GetCount returns the current count as a json-encoded number
-    #[returns(GetAllContractsUnderManagementResponse)]
-    GetAllContractsUnderManagement {},
-}
-
-#[cw_serde]
-pub struct GetAllContractsUnderManagementResponse {
-    pub contract_addrs: Vec<String>,
-}
+pub enum QueryMsg {}

@@ -1,5 +1,8 @@
 use cw_storage_plus::{Item, Map};
 
+// contract admin.
+pub const ADMIN_ADDR: Item<String> = Item::new("admin_addr");
+
 // relation between dear_leader_account and the list of vote delegatores.
 pub const DEAR_LEADER_BOARD: Map<String, Option<Vec<String>>> = Map::new("dear_leader_board");
 
